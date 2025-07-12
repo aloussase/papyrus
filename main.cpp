@@ -20,6 +20,22 @@ begin education
     activity "man that sucks"
   end
 end
+
+begin experience
+  begin position
+    company "TIA Sa"
+    start-date "01/01/1999"
+    end-date "01/02/1999"
+    location "Guayaquil"
+    title "Software Developer"
+    stack "Java, ReactNatvie"
+
+    begin activities
+      activity "Did some shit"
+      activity "Did other shit"
+    end
+  end
+end
 )";
 
   papy::Parser parser(source);

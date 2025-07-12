@@ -32,6 +32,7 @@ namespace papy {
         Location,
         Title,
         TechStack,
+        Position,
         // Sections
         Experience,
         Metadata,
