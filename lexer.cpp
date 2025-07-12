@@ -23,13 +23,13 @@ namespace papy {
       return lexer->source[lexer->current++];
    }
 
-   static void token(Lexer *lexer, TokenType type) noexcept {
-      Token token;
-      token.lexeme = std::string(&lexer->source[lexer->start], lexer->current - lexer->start);
-      token.lineno = lexer->lineno;
-      token.pos = lexer->start;
-      token.type = type;
-      lexer->tokens.push_back(std::move(token));
+   static void emit_token(Lexer *lexer, TokenType type) noexcept {
+      Token emit_token;
+      emit_token.lexeme = std::string(&lexer->source[lexer->start], lexer->current - lexer->start);
+      emit_token.lineno = lexer->lineno;
+      emit_token.pos = lexer->start;
+      emit_token.type = type;
+      lexer->tokens.push_back(std::move(emit_token));
    }
 
    [[nodiscard]]
@@ -39,7 +39,7 @@ namespace papy {
 
       char k = peek(lexer);
 
-      while (k && k != ' ' && k != '\n' && k != '"') {
+      while (k && k != '\n' && k != '"') {
          advance(lexer);
          k = peek(lexer);
       }
@@ -54,7 +54,7 @@ namespace papy {
       }
 
       advance(lexer);
-      token(lexer, TokenType::String);
+      emit_token(lexer, TokenType::String);
 
       return true;
    }
@@ -70,9 +70,9 @@ namespace papy {
       uint32_t n = lexer->current - lexer->start;
 
       if (strncmp(&lexer->source[lexer->start], "begin", n) == 0) {
-         token(lexer, TokenType::Begin);
+         emit_token(lexer, TokenType::Begin);
       }
-#define X(type, string) else if (strncmp(&lexer->source[lexer->start], string, n) == 0) token(lexer, type);
+#define X(type, string) else if (strncmp(&lexer->source[lexer->start], string, n) == 0) emit_token(lexer, type);
       X(TokenType::End, "end")
       X(TokenType::Name, "name")
       X(TokenType::Email, "email")

@@ -4,8 +4,16 @@ project(papyrus)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(papy main.cpp
+add_library(papylib STATIC
         diagnostic.h
         lexer.h
         lexer.cpp
-        token.h)
+        token.h
+        ast.cpp
+        ast.h
+        Parser.cpp
+        Parser.h)
+
+add_executable(papy main.cpp)
+target_link_libraries(papy PUBLIC papylib)
+target_compile_options(papy PUBLIC -Wall -Wextra)
