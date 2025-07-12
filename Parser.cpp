@@ -58,17 +58,17 @@ namespace papy {
     if (!__o_token__) return nullptr; \
     const auto &token = __o_token__.value();
 
-#define EXPECT_STRING(P) \
+#define EXPECT_STRING(P, R) \
     ({ \
         auto __os__ = expect_string(P);\
-        if (!__os__) return nullptr;\
+        if (!__os__) return (R);\
         __os__.value();\
     })
 
-#define SET_STRING(type, field) \
+#define SET_STRING(node, type, field, R) \
     case type: \
         (void) advance(parser); \
-        node->field = EXPECT_STRING(parser); \
+        node->field = EXPECT_STRING(parser, R); \
         otoken = peek(parser);\
         break;
 
@@ -97,11 +97,11 @@ namespace papy {
 
     [[nodiscard]] bool activities(Parser *parser, std::vector<std::string> &as) noexcept {
         auto otoken = peek(parser);
+
         if (!otoken && otoken->type != TokenType::Begin) return true;
-
-        (void) advance(parser);
         (void) advance(parser);
 
+        (void) advance(parser);
         if (!expect(parser, TokenType::Activities)) return false;
 
         auto act = activity(parser);
@@ -121,10 +121,10 @@ namespace papy {
         auto *node = new ast::Metadata;
         while (otoken) {
             switch (otoken->type) {
-                SET_STRING(TokenType::Name, m_name);
-                SET_STRING(TokenType::Email, m_email);
-                SET_STRING(TokenType::PhoneNumber, m_phone_number);
-                SET_STRING(TokenType::Tagline, m_tagline);
+                SET_STRING(node, TokenType::Name, m_name, nullptr);
+                SET_STRING(node, TokenType::Email, m_email, nullptr);
+                SET_STRING(node, TokenType::PhoneNumber, m_phone_number, nullptr);
+                SET_STRING(node, TokenType::Tagline, m_tagline, nullptr);
                 case TokenType::End:
                     (void) advance(parser);
                     goto done;
@@ -132,12 +132,15 @@ namespace papy {
                     emit_diagnostic(
                         parser,
                         "Invalid token in metadata block: " + token::to_string(otoken->type));
+                    delete node;
                     return nullptr;
             }
         }
     done:
-        if (!expect(parser, TokenType::End))
+        if (!expect(parser, TokenType::End)) {
+            delete node;
             return nullptr;
+        }
         return node;
     }
 
@@ -146,11 +149,13 @@ namespace papy {
         auto *node = new ast::Education;
         while (otoken) {
             switch (otoken->type) {
-                SET_STRING(TokenType::Institution, m_institution);
-                SET_STRING(TokenType::Degree, m_degree);
+                SET_STRING(node, TokenType::Institution, m_institution, nullptr);
+                SET_STRING(node, TokenType::Degree, m_degree, nullptr);
                 case TokenType::Begin:
                     if (!activities(parser, node->m_activities))
                         return nullptr;
+                    otoken = peek(parser);
+                    break;
                 case TokenType::End:
                     (void) advance(parser);
                     goto done;
@@ -167,7 +172,70 @@ namespace papy {
         return node;
     }
 
+    [[nodiscard]] static bool position(Parser *parser, ast::Position &position) {
+        auto otoken = peek(parser);
+        assert(otoken && "Expected 'begin' but got nothing");
+        assert(otoken->type == TokenType::Begin && "Expected 'begin' but got something else");
+
+        (void) advance(parser);
+        (void) advance(parser);
+
+        if (!expect(parser, TokenType::Position)) {
+            return false;
+        }
+
+        while ((otoken = peek(parser))) {
+            switch (otoken->type) {
+                SET_STRING((&position), TokenType::Company, m_company, false);
+                SET_STRING((&position), TokenType::StartDate, m_start_date, false);
+                SET_STRING((&position), TokenType::EndDate, m_end_date, false);
+                SET_STRING((&position), TokenType::Location, m_location, false);
+                SET_STRING((&position), TokenType::Title, m_title, false);
+                SET_STRING((&position), TokenType::TechStack, m_tech_stack, false);
+                case TokenType::End:
+                    (void) advance(parser);
+                    goto done;
+                case TokenType::Begin:
+                    if (!activities(parser, position.m_activities))
+                        return false;
+                    break;
+                default:
+                    emit_diagnostic(parser,
+                                    "Invalid token in position block: " + token::to_string(otoken->type));
+                    return false;
+            }
+        }
+
+    done:
+
+        if (!expect(parser, TokenType::End)) return false;
+
+        return true;
+    }
+
     [[nodiscard]] static ast::Node *experience(Parser *parser) {
+        assert(parser->m_tokens[parser->current - 1].type == TokenType::Experience);
+
+        auto otoken = peek(parser);
+        auto *node = new ast::Experience;
+
+        while (otoken && otoken->type == TokenType::Begin) {
+            ast::Position p;
+            if (!position(parser, p)) {
+                delete node;
+                return nullptr;
+            }
+            node->m_positions.push_back(std::move(p));
+            otoken = peek(parser);
+        }
+
+        (void) advance(parser);
+        if (!expect(parser, TokenType::End)) {
+            delete node;
+            return nullptr;
+        }
+
+        return node;
     }
 
     [[nodiscard]] static ast::Node *block(Parser *parser) {

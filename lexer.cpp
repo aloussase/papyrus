@@ -91,6 +91,7 @@ namespace papy {
       X(TokenType::Metadata, "metadata")
       X(TokenType::Education, "education")
       X(TokenType::Activities, "activities")
+      X(TokenType::Position, "position")
 #undef X
       else {
          lexer->diagnostics.push_back({
