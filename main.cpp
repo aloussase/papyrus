@@ -1,5 +1,8 @@
 #include "Parser.h"
 #include <iostream>
+#include <memory>
+
+#include "PdfBackend.h"
 
 auto main() -> int {
   static const char *source = R"(begin metadata
@@ -22,25 +25,18 @@ end
   papy::Parser parser(source);
   auto ast = parser.parse();
 
-  if (ast.size() > 0 && ast[0]) {
-    std::cout << dynamic_cast<papy::ast::Metadata *>(ast[0])->m_name << "\n";
-    std::cout << dynamic_cast<papy::ast::Metadata *>(ast[0])->m_email << "\n";
-    std::cout << dynamic_cast<papy::ast::Metadata *>(ast[0])->m_phone_number << "\n";
-    std::cout << dynamic_cast<papy::ast::Metadata *>(ast[0])->m_tagline << "\n";
-    delete ast[0];
-  }
+  auto backend = std::make_unique<papy::PdfBackend>();
 
-  if (ast.size() >= 1 && ast[1]) {
-    std::cout << dynamic_cast<papy::ast::Education *>(ast[1])->m_institution << "\n";
-    std::cout << dynamic_cast<papy::ast::Education *>(ast[1])->m_degree << "\n";
-    std::cout << dynamic_cast<papy::ast::Education *>(ast[1])->m_activities[0] << "\n";
-    std::cout << dynamic_cast<papy::ast::Education *>(ast[1])->m_activities[1] << "\n";
-    delete ast[1];
+  if (!ast.empty()) {
+    backend->accept(ast);
+    for (auto node: ast) {
+      delete node;
+    }
+    return 0;
+  } else {
+    for (const auto &diag: parser.m_diagnostics) {
+      std::cerr << diag.lineno << "|" << diag.message << "\n";
+    }
+    return 1;
   }
-
-  for (auto diag: parser.m_diagnostics) {
-    std::cerr << diag.lineno << "|" << diag.message << "\n";
-  }
-
-  return 0;
 }
