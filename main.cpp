@@ -23,16 +23,30 @@ end
 
 begin experience
   begin position
-    company "TIA Sa"
-    start-date "01/01/1999"
-    end-date "01/02/1999"
-    location "Guayaquil"
+    company "Thoughtworks"
+    start-date "January 2025"
+    end-date ""
+    location "Remote"
+    title "Software Developer Consultant"
+    stack "Java, ReactNatvie"
+
+    begin activities
+      activity "Developed distributed applications in the travel and loyalty industries"
+      activity "Developed UI components using a microfrontends architecture"
+    end
+  end
+
+  begin position
+    company "TIA S.A."
+    start-date "July 2024"
+    end-date "December 2024"
+    location "Guayaquil, Ecuador"
     title "Software Developer"
     stack "Java, ReactNatvie"
 
     begin activities
-      activity "Did some shit"
-      activity "Did other shit"
+      activity "Designed database schemas for store personel accountability"
+      activity "Developed web applications"
     end
   end
 end

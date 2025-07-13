@@ -46,15 +46,57 @@ namespace papy {
 
         painter.DrawLine(
             SX,
-            SY - 20 - title_size,
+            SY - 20 - 8,
             document_page->GetRect().GetRight() - SX,
-            SY - 20 - title_size);
+            SY - 20 - 8);
     }
 
     void PdfBackend::draw(PoDoFo::PdfPainter &, ast::Education *) noexcept {
     }
 
-    void PdfBackend::draw(PoDoFo::PdfPainter &, ast::Experience *) noexcept {
+    void PdfBackend::draw(PoDoFo::PdfPainter &painter, ast::Experience *exp) noexcept {
+        auto starty = SY - 20 - title_size - 20;
+
+        painter.DrawText("I. EXPERIENCE",
+                         SX,
+                         starty);
+
+        painter.DrawLine(
+            SX, starty - 8,
+            document_page->GetRect().GetRight() - SX, starty - 8);
+
+        starty -= 8;
+
+        for (const auto &position: exp->m_positions) {
+            auto dates = position.m_start_date + " - " + position.m_end_date;
+
+            painter.DrawText(position.m_company, SX, starty - 15);
+            painter.DrawText(position.m_title, SX, starty - 30);
+
+            painter.DrawText(
+                dates,
+                document_page->GetRect().GetRight() - SX - normal_font->GetStringLength(dates, painter.TextState),
+                starty - 15);
+
+            painter.DrawText(
+                position.m_location,
+                document_page->GetRect().GetRight() - SX - normal_font->GetStringLength(
+                    position.m_location, painter.TextState),
+                starty - 30);
+
+            starty -= 35;
+
+            for (const auto &activity: position.m_activities) {
+                auto text = "- " + activity;
+                painter.DrawText(
+                    text,
+                    SX,
+                    starty - 12);
+                starty -= 12;
+            }
+
+            starty -= 10;
+        }
     }
 
     void PdfBackend::accept(const std::vector<ast::Node *> &ast) {
