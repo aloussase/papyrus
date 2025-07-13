@@ -5,52 +5,7 @@
 #include "PdfBackend.h"
 
 auto main() -> int {
-  static const char *source = R"(begin metadata
-  name "Alexander Goussas "
-  email "goussasalexander@gmail.com"
-  phone "0995764993"
-  tagline "Software Developer"
-end
-
-begin education
-  institution "Escuela Superior Politecnica del Litoral"
-  degree "Bsc. Computer Science"
-  begin activities
-    activity "Graduate thesis on the performance of distributed systems"
-    activity "Teaching assitant for a lot of shit"
-  end
-end
-
-begin experience
-  begin position
-    company "Thoughtworks"
-    start-date "January 2025"
-    end-date ""
-    location "Remote"
-    title "Software Developer Consultant"
-    stack "Java, ReactNatvie"
-
-    begin activities
-      activity "Developed distributed applications in the travel and loyalty industries"
-      activity "Developed UI components using a microfrontends architecture"
-    end
-  end
-
-  begin position
-    company "TIA S.A."
-    start-date "July 2024"
-    end-date "December 2024"
-    location "Guayaquil, Ecuador"
-    title "Software Developer"
-    stack "Java, ReactNatvie"
-
-    begin activities
-      activity "Designed database schemas for store personel accountability"
-      activity "Developed web applications"
-    end
-  end
-end
-)";
+  static const char *source = R"( )";
 
   papy::Parser parser(source);
   auto ast = parser.parse();

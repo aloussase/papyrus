@@ -18,11 +18,21 @@ static PoDoFo::PdfPage *document_page;
 static double next_start;
 
 constexpr int title_size = 16;
+constexpr int subtitle_size = 12;
+constexpr int mini_title_size = 11;
 constexpr int body_size = 10;
 
 namespace papy {
     void use_bold_title(PoDoFo::PdfPainter &painter) {
         painter.TextState.SetFont(*bold_font, title_size);
+    }
+
+    void use_mini_bold_title(PoDoFo::PdfPainter &painter) {
+        painter.TextState.SetFont(*bold_font, mini_title_size);
+    }
+
+    void use_subtitle(PoDoFo::PdfPainter &painter) {
+        painter.TextState.SetFont(*bold_font, subtitle_size);
     }
 
     void use_normal_body(PoDoFo::PdfPainter &painter) {
@@ -58,9 +68,11 @@ namespace papy {
     double PdfBackend::draw(PoDoFo::PdfPainter &painter, ast::Education *ed) noexcept {
         auto starty = next_start - 20;
 
+        use_subtitle(painter);
         painter.DrawText("EDUCATION",
                          SX,
                          starty);
+        use_normal_body(painter);
 
         painter.DrawLine(
             SX, starty - 8,
@@ -68,10 +80,12 @@ namespace papy {
 
         starty -= 8;
 
+        use_mini_bold_title(painter);
         painter.DrawText(
             ed->m_institution,
             SX,
             starty - 12);
+        use_normal_body(painter);
 
         painter.DrawText(
             ed->m_degree,
@@ -95,9 +109,11 @@ namespace papy {
     double PdfBackend::draw(PoDoFo::PdfPainter &painter, ast::Experience *exp) noexcept {
         auto starty = next_start - 20;
 
+        use_subtitle(painter);
         painter.DrawText("EXPERIENCE",
                          SX,
                          starty);
+        use_normal_body(painter);
 
         painter.DrawLine(
             SX, starty - 8,
@@ -108,7 +124,10 @@ namespace papy {
         for (const auto &position: exp->m_positions) {
             auto dates = position.m_start_date + " - " + position.m_end_date;
 
+            use_mini_bold_title(painter);
             painter.DrawText(position.m_company, SX, starty - 15);
+            use_normal_body(painter);
+
             painter.DrawText(position.m_title, SX, starty - 30);
 
             painter.DrawText(
