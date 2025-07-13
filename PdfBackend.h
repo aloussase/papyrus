@@ -14,11 +14,11 @@ namespace papy {
         void accept(const std::vector<ast::Node *> &) override;
 
     private:
-        void draw(PoDoFo::PdfPainter &, ast::Metadata *) noexcept;
+        [[nodiscard]] double draw(PoDoFo::PdfPainter &, ast::Metadata *) noexcept;
 
-        void draw(PoDoFo::PdfPainter &, ast::Education *) noexcept;
+        [[nodiscard]] double draw(PoDoFo::PdfPainter &, ast::Education *) noexcept;
 
-        void draw(PoDoFo::PdfPainter &, ast::Experience *) noexcept;
+        [[nodiscard]] double draw(PoDoFo::PdfPainter &, ast::Experience *) noexcept;
     };
 } // papy
 

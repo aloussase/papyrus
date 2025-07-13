@@ -13,11 +13,11 @@ auto main() -> int {
 end
 
 begin education
-  institution "ESPOL"
-  degree "Computer Science"
+  institution "Escuela Superior Politecnica del Litoral"
+  degree "Bsc. Computer Science"
   begin activities
-    activity "hello world!"
-    activity "man that sucks"
+    activity "Graduate thesis on the performance of distributed systems"
+    activity "Teaching assitant for a lot of shit"
   end
 end
 

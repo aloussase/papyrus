@@ -15,6 +15,8 @@ static PoDoFo::PdfFont *bold_font;
 
 static PoDoFo::PdfPage *document_page;
 
+static double next_start;
+
 constexpr int title_size = 16;
 constexpr int body_size = 10;
 
@@ -27,7 +29,7 @@ namespace papy {
         painter.TextState.SetFont(*normal_font, body_size);
     }
 
-    void PdfBackend::draw(PoDoFo::PdfPainter &painter, ast::Metadata *meta) noexcept {
+    double PdfBackend::draw(PoDoFo::PdfPainter &painter, ast::Metadata *meta) noexcept {
         use_bold_title(painter);
         painter.DrawText(meta->m_name, SX, SY - 20);
 
@@ -49,15 +51,51 @@ namespace papy {
             SY - 20 - 8,
             document_page->GetRect().GetRight() - SX,
             SY - 20 - 8);
+
+        return SY - 20 - title_size;
     }
 
-    void PdfBackend::draw(PoDoFo::PdfPainter &, ast::Education *) noexcept {
+    double PdfBackend::draw(PoDoFo::PdfPainter &painter, ast::Education *ed) noexcept {
+        auto starty = next_start - 20;
+
+        painter.DrawText("EDUCATION",
+                         SX,
+                         starty);
+
+        painter.DrawLine(
+            SX, starty - 8,
+            document_page->GetRect().GetRight() - SX, starty - 8);
+
+        starty -= 8;
+
+        painter.DrawText(
+            ed->m_institution,
+            SX,
+            starty - 12);
+
+        painter.DrawText(
+            ed->m_degree,
+            SX,
+            starty - 25);
+
+        starty -= 30;
+
+        for (const auto &a: ed->m_activities) {
+            auto text = "- " + a;
+            painter.DrawText(
+                text,
+                SX,
+                starty - 12);
+            starty -= 12;
+        }
+
+        return starty - 10;
     }
 
-    void PdfBackend::draw(PoDoFo::PdfPainter &painter, ast::Experience *exp) noexcept {
-        auto starty = SY - 20 - title_size - 20;
+    double PdfBackend::draw(PoDoFo::PdfPainter &painter, ast::Experience *exp) noexcept {
+        auto starty = next_start - 20;
 
-        painter.DrawText("I. EXPERIENCE",
+        painter.DrawText("EXPERIENCE",
                          SX,
                          starty);
 
@@ -97,6 +135,8 @@ namespace papy {
 
             starty -= 10;
         }
+
+        return starty;
     }
 
     void PdfBackend::accept(const std::vector<ast::Node *> &ast) {
@@ -106,6 +146,7 @@ namespace papy {
         auto &page = document.GetPages().CreatePage(PoDoFo::PdfPageSize::A4);
         painter.SetCanvas(page);
 
+        // TODO: Make these configurable.
         normal_font = document.GetFonts().SearchFont("DejaVuSerif");
         bold_font = document.GetFonts().SearchFont("DejaVuSerif-Bold");
 
@@ -116,11 +157,11 @@ namespace papy {
 
         for (auto node: ast) {
             if (auto *meta = dynamic_cast<ast::Metadata *>(node)) {
-                draw(painter, meta);
+                next_start = draw(painter, meta);
             } else if (auto *exp = dynamic_cast<ast::Experience *>(node)) {
-                draw(painter, exp);
+                next_start = draw(painter, exp);
             } else if (auto *education = dynamic_cast<ast::Education *>(node)) {
-                draw(painter, education);
+                next_start = draw(painter, education);
             } else {
                 fprintf(stderr, "warning: tried to draw invalid node type\n");
             }
