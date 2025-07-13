@@ -2,3 +2,4 @@ build
 *.papy
 .idea
 *.pdf
+stats.jsonl
