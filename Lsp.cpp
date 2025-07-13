@@ -31,30 +31,26 @@ readTextDocument(lspframework::TextDocumentIdentifier& textDocument)
 
 [[noreturn]] void start()
 {
-    auto connection = lspframework::Connection(lspframework::io::standardIO());
+    auto connection     = lspframework::Connection(lspframework::io::standardIO());
     auto messageHandler = lspframework::MessageHandler(connection);
 
     messageHandler
-        .add<lspframework::requests::Initialize>(
-            [](lspframework::requests::Initialize::Params&&) {
-                lspframework::ServerCapabilities capabilities;
+        .add<lspframework::requests::Initialize>([](lspframework::requests::Initialize::Params&&) {
+            lspframework::ServerCapabilities capabilities;
 
-                capabilities.hoverProvider = true;
-                capabilities.textDocumentSync
-                    = lspframework::TextDocumentSyncKind::Full;
+            capabilities.hoverProvider    = true;
+            capabilities.textDocumentSync = lspframework::TextDocumentSyncKind::Full;
 
-                return lspframework::requests::Initialize::Result {
-                    .capabilities = capabilities,
-                    .serverInfo   = lspframework::
-                        InitializeResultServerInfo { .name
-                                                     = "papy-language-server",
-                                                     .version = "1.0.0" },
-                };
-            })
+            return lspframework::requests::Initialize::Result {
+                .capabilities = capabilities,
+                .serverInfo
+                = lspframework::InitializeResultServerInfo { .name    = "papy-language-server",
+                                                             .version = "1.0.0" },
+            };
+        })
         .add<lspframework::requests::TextDocument_Hover>(
             [](lspframework::requests::TextDocument_Hover::Params&& params) {
-                std::stringstream contents { readTextDocument(
-                    params.textDocument) };
+                std::stringstream contents { readTextDocument(params.textDocument) };
                 std::string line;
                 unsigned int i = 0;
 
@@ -84,10 +80,7 @@ readTextDocument(lspframework::TextDocumentIdentifier& textDocument)
                 w += 1;
 
                 auto symbol = line.substr(w, x - w);
-                fprintf(
-                    LOGFILE,
-                    "Got hover request for symbol: %s\n",
-                    symbol.c_str());
+                fprintf(LOGFILE, "Got hover request for symbol: %s\n", symbol.c_str());
 
                 std::string hover;
 
@@ -112,26 +105,21 @@ readTextDocument(lspframework::TextDocumentIdentifier& textDocument)
                     hover = "Your work experience";
                 }
 
-                return lspframework::requests::TextDocument_Hover::Result {
-                    lspframework::Hover { hover }
-                };
+                return lspframework::requests::TextDocument_Hover::Result { lspframework::Hover {
+                    hover } };
             })
         .add<lsp::notifications::TextDocument_DidSave>(
-            [&messageHandler](
-                lsp::notifications::TextDocument_DidSave::Params&& params) {
+            [&messageHandler](lsp::notifications::TextDocument_DidSave::Params&& params) {
                 std::string contents = readTextDocument(params.textDocument);
 
                 papy::Parser parser { contents.c_str() };
                 auto ast = parser.parse();
 
-                std::for_each(
-                    ast.begin(),
-                    ast.end(),
-                    [](papy::ast::Node* node) { delete node; });
+                std::for_each(ast.begin(), ast.end(), [](papy::ast::Node* node) { delete node; });
 
                 auto& diagnostics = parser.m_diagnostics;
-                auto response     = lspframework::notifications::
-                    TextDocument_PublishDiagnostics::Params {};
+                auto response
+                    = lspframework::notifications::TextDocument_PublishDiagnostics::Params {};
 
                 response.uri = params.textDocument.uri;
 
@@ -149,8 +137,7 @@ readTextDocument(lspframework::TextDocumentIdentifier& textDocument)
                 }
 
                 messageHandler
-                    .sendNotification<lspframework::notifications::
-                                          TextDocument_PublishDiagnostics>(
+                    .sendNotification<lspframework::notifications::TextDocument_PublishDiagnostics>(
                         std::move(response));
             });
 

@@ -14,7 +14,7 @@ AllowAllParametersOfDeclarationOnNextLine: false
 BinPackParameters: false
 AlignAfterOpenBracket: AlwaysBreak
 AlwaysBreakTemplateDeclarations: Yes
-ColumnLimit: 80
+ColumnLimit: 100
 AllowShortEnumsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Empty
