@@ -24,12 +24,14 @@ namespace papy {
    }
 
    static void emit_token(Lexer *lexer, TokenType type) noexcept {
-      Token emit_token;
-      emit_token.lexeme = std::string(&lexer->source[lexer->start], lexer->current - lexer->start);
-      emit_token.lineno = lexer->lineno;
-      emit_token.pos = lexer->start;
-      emit_token.type = type;
-      lexer->tokens.push_back(std::move(emit_token));
+      bool isString = type == TokenType::String;
+      int x = isString ? 1 : 0;
+      Token t;
+      t.lexeme = std::string(&lexer->source[lexer->start] + x, lexer->current - lexer->start - x - x);
+      t.lineno = lexer->lineno;
+      t.pos = lexer->start;
+      t.type = type;
+      lexer->tokens.push_back(std::move(t));
    }
 
    [[nodiscard]]
