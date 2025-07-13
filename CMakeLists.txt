@@ -20,7 +20,9 @@ add_subdirectory(vendor/podofo)
 add_executable(papy main.cpp
         # TODO: Add this conditionally based on an option.
         PdfBackend.cpp
-        PdfBackend.h)
+        PdfBackend.h
+        FileWatcher.cpp
+        FileWatcher.h)
 target_link_libraries(papy PUBLIC papylib)
 target_compile_options(papy PUBLIC -Wall -Wextra)
 
