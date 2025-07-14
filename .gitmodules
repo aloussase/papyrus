@@ -1,0 +1,6 @@
+[submodule "vendor/podofo"]
+	path = vendor/podofo
+	url = git@github.com:aloussase/podofo.git
+[submodule "vendor/lsp-framework"]
+	path = vendor/lsp-framework
+	url = git@github.com:aloussase/lsp-framework.git

@@ -1,4 +1,8 @@
 build
+.ccls-cache
 *.papy
 .idea
 *.pdf
+stats.jsonl
+opencode.json
+compile_commands.json
